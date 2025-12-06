@@ -1,6 +1,6 @@
 # Dee
 
-A bare-bones **d**eferred-**e**xecution **e**numerator library.
+A fast, concurrency-driven **d**eferred-**e**xecution **e**numerator library.
 
 ```go
 // Keep only the elements where in returns true. Optional comment strings.
