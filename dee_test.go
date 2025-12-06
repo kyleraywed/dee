@@ -10,14 +10,14 @@ import (
 
 func TestFilter(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dee[int]
+	var emum Dee[int]
 
-	iter.Filter(func(value int) bool {
+	emum.Filter(func(value int) bool {
 		return value%2 == 0 // return evens
 	})
 
 	expected := []int{2, 4, 6, 8, 10}
-	gotten := iter.Apply(numbers)
+	gotten := emum.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Filter len mismatch")
@@ -32,14 +32,14 @@ func TestFilter(t *testing.T) {
 
 func TestMap(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dee[int]
+	var emum Dee[int]
 
-	iter.Map(func(value int) int {
+	emum.Map(func(value int) int {
 		return value * value // square the numbers
 	})
 
 	expected := []int{1, 4, 9, 16, 25, 36, 49, 64, 81, 100}
-	gotten := iter.Apply(numbers)
+	gotten := emum.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Map len mismatch")
@@ -54,12 +54,12 @@ func TestMap(t *testing.T) {
 
 func TestTake(t *testing.T) {
 	numbers := []int{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21}
-	var iter Dee[int]
+	var emum Dee[int]
 
-	iter.Take(11)
+	emum.Take(11)
 
 	expected := []int{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21}
-	gotten := iter.Apply(numbers)
+	gotten := emum.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Take len mismatch")
@@ -74,12 +74,12 @@ func TestTake(t *testing.T) {
 
 func TestSkip(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dee[int]
+	var emum Dee[int]
 
-	iter.Skip(3)
+	emum.Skip(3)
 
 	expected := []int{4, 5, 6, 7, 8, 9, 10}
-	gotten := iter.Apply(numbers)
+	gotten := emum.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Skip len mismatch")
@@ -94,16 +94,16 @@ func TestSkip(t *testing.T) {
 
 func TestForeach(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dee[int]
+	var emum Dee[int]
 
 	expected := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 	var gotten []string
 
-	iter.Foreach(func(value int) {
+	emum.Foreach(func(value int) {
 		gotten = append(gotten, strconv.Itoa(value))
 	})
 
-	iter.Apply(numbers)
+	emum.Apply(numbers)
 
 	for idx, val := range expected {
 		if gotten[idx] != val {
@@ -114,20 +114,20 @@ func TestForeach(t *testing.T) {
 
 func TestForeachFast(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dee[int]
+	var emum Dee[int]
 
 	expected := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 	var gotten []string
 
 	var mu sync.Mutex
 
-	iter.Foreach(func(value int) { // Don't do this in production, kids.
+	emum.Foreach(func(value int) { // Don't do this in production, kids.
 		mu.Lock()
 		gotten = append(gotten, strconv.Itoa(value))
 		mu.Unlock()
 	}, "con")
 
-	iter.Apply(numbers)
+	emum.Apply(numbers)
 
 	slices.SortFunc(gotten, func(a, b string) int {
 		ai, _ := strconv.Atoi(a)
@@ -143,29 +143,29 @@ func TestForeachFast(t *testing.T) {
 }
 
 func TestOrder(t *testing.T) {
-	var iter Dee[int]
+	var emum Dee[int]
 
-	iter.Filter(func(value int) bool {
+	emum.Filter(func(value int) bool {
 		return value%2 == 0
 	}, "Foo")
 
-	iter.Map(func(value int) int {
+	emum.Map(func(value int) int {
 		return value * 2
 	}, "Bar")
 
-	iter.Take(3)
+	emum.Take(3)
 
-	iter.Skip(1)
+	emum.Skip(1)
 
-	iter.Map(func(value int) int {
+	emum.Map(func(value int) int {
 		return value + 1
 	}, "baz")
 
-	iter.Filter(func(value int) bool {
+	emum.Filter(func(value int) bool {
 		return value%2 != 0
 	}, "boo")
 
-	iter.Take(3)
+	emum.Take(3)
 
 	expected := []struct {
 		adapter  string
@@ -181,19 +181,19 @@ func TestOrder(t *testing.T) {
 		{adapter: "take", index: 1, comments: []string{"3"}},
 	}
 
-	if len(iter.orders) != len(expected) {
+	if len(emum.orders) != len(expected) {
 		t.Error("Order len mismatch")
 	}
 
 	for idx, val := range expected {
-		if iter.orders[idx].method != val.adapter {
-			t.Errorf("Order adapter mismatch.\nExpected: [%v] Got: [%v]\n", val.adapter, iter.orders[idx].method)
+		if emum.orders[idx].method != val.adapter {
+			t.Errorf("Order adapter mismatch.\nExpected: [%v] Got: [%v]\n", val.adapter, emum.orders[idx].method)
 		}
-		if iter.orders[idx].index != val.index {
-			t.Errorf("Order index mismatch.\nExpected: [%v] Got: [%v]\n", val.index, iter.orders[idx].index)
+		if emum.orders[idx].index != val.index {
+			t.Errorf("Order index mismatch.\nExpected: [%v] Got: [%v]\n", val.index, emum.orders[idx].index)
 		}
-		if iter.orders[idx].comments[0] != val.comments[0] {
-			t.Errorf("Order comment mismatch.\nExpected: [%v] Got: [%v]\n", val.comments, iter.orders[idx].comments[0])
+		if emum.orders[idx].comments[0] != val.comments[0] {
+			t.Errorf("Order comment mismatch.\nExpected: [%v] Got: [%v]\n", val.comments, emum.orders[idx].comments[0])
 		}
 	}
 }
@@ -215,9 +215,9 @@ func TestDeepClone(t *testing.T) {
 
 	people := []person{p1}
 
-	var iter Dee[person]
+	var emum Dee[person]
 
-	iter.WithDeepClone(func(value person) person {
+	emum.WithDeepClone(func(value person) person {
 		out := value
 		// strings are value types, no need enforce deep clone for name
 		out.tags = slices.Clone(value.tags)
@@ -226,13 +226,13 @@ func TestDeepClone(t *testing.T) {
 		return out
 	})
 
-	iter.Map(func(value person) person {
+	emum.Map(func(value person) person {
 		value.tags[0] = "CHANGED"
 		value.meta["one"] = 99
 		return value
 	})
 
-	out := iter.Apply(people)
+	out := emum.Apply(people)
 
 	if out[0].tags[0] != "CHANGED" {
 		t.Fatalf("Deep Clone mutation error, no change.\nExpected: [\"CHANGED\"] Got: [%v]\n", out[0].tags[0])
