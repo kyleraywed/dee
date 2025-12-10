@@ -253,14 +253,9 @@ func (iter *Dee[T]) WithDeepClone(in func(value T) T, comments ...string) {
 
 func (iter Dee[T]) String() string {
 	var out string
-	var isDCS bool
-
-	if iter.userDeepClone != nil {
-		isDCS = true
-	}
 
 	out += fmt.Sprintf(
-		"Deep clone implemented: %v\n", isDCS,
+		"Deep clone implemented: %v\n", iter.userDeepClone != nil,
 	)
 
 	for idx, val := range iter.orders {
