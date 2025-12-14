@@ -80,3 +80,5 @@ Notes and design
 - If your input data is or contains reference types, remember to use the
 WithDeepClone() method. Otherwise, you may end up with unintended side-effects on
 the input data. If that's of no consequence, the default shallow copy is quick.
+
+- Derp is **not** safe for concurrent use.
