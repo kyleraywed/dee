@@ -98,7 +98,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 		workingSlice = slices.Clone(input) // shallow copy
 	}
 
-	numWorkers := runtime.NumCPU()
+	numWorkers := runtime.GOMAXPROCS(0)
 	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 
 	for _, order := range iter.orders {
@@ -141,7 +141,12 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			wg.Wait()
 
 			// Flatten
-			tempSlice := make([]T, 0, len(workingSlice))
+			newlength := 0
+			for _, r := range results {
+				newlength += len(r)
+			}
+			tempSlice := make([]T, 0, newlength)
+
 			for _, r := range results {
 				tempSlice = append(tempSlice, r...)
 			}
