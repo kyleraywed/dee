@@ -1,4 +1,6 @@
-package dei
+package derp
+
+// Deferred Execution Reusable data-processing Pipeline
 
 /*
 	REMEMBER:
@@ -21,7 +23,7 @@ type order struct {
 	comments []string
 }
 
-type Dei[T any] struct {
+type Derp[T any] struct {
 	filters    []func(t T) bool
 	mappers    []func(t T) T
 	foreachers []func(t T)
@@ -35,7 +37,7 @@ type Dei[T any] struct {
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
-func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
+func (iter *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 	iter.filters = append(iter.filters, in)
 	iter.orders = append(iter.orders, order{
 		method: "filter", index: len(iter.filters) - 1, comments: comments,
@@ -46,7 +48,7 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
 // Set the first optional comment to "con" for concurrent execution of input functions.
 // Concurrent execution will be slower for most use-cases, while the order in which the funcs are
 // evaluated is non-deterministic. Be careful when using "con".
-func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
+func (iter *Derp[T]) Foreach(in func(value T), comments ...string) {
 	iter.foreachers = append(iter.foreachers, in)
 	iter.orders = append(iter.orders, order{
 		method: "foreach", index: len(iter.foreachers) - 1, comments: comments,
@@ -54,7 +56,7 @@ func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 }
 
 // Transform each element by applying a function. Optional comment strings.
-func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
+func (iter *Derp[T]) Map(in func(value T) T, comments ...string) {
 	iter.mappers = append(iter.mappers, in)
 	iter.orders = append(iter.orders, order{
 		method: "map", index: len(iter.mappers) - 1, comments: comments,
@@ -62,7 +64,7 @@ func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 }
 
 // Skip the first n items and yields the rest. Comments inferred.
-func (iter *Dei[T]) Skip(n int) {
+func (iter *Derp[T]) Skip(n int) {
 	if n < 1 {
 		log.Printf("Skip(%v): No order submitted.", n)
 		return
@@ -75,7 +77,7 @@ func (iter *Dei[T]) Skip(n int) {
 }
 
 // Yield only the first n items from the iterator. Comments inferred.
-func (iter *Dei[T]) Take(n int) {
+func (iter *Derp[T]) Take(n int) {
 	if n < 1 {
 		log.Printf("Take(%v): No order submitted.", n)
 		return
@@ -88,7 +90,7 @@ func (iter *Dei[T]) Take(n int) {
 }
 
 // Interpret orders on data. Return new slice.
-func (iter *Dei[T]) Apply(input []T) []T {
+func (iter *Derp[T]) Apply(input []T) []T {
 	workingSlice := make([]T, len(input))
 	if iter.userDeepClone != nil {
 		for i := range input {
@@ -244,11 +246,11 @@ func (iter *Dei[T]) Apply(input []T) []T {
 // that the original input is never mutated, provide a deep clone function here.
 // The clone function must return a fully independent copy of the element. By
 // default, all values, reference or not, are shallowly cloned.
-func (iter *Dei[T]) WithDeepClone(in func(value T) T, comments ...string) {
+func (iter *Derp[T]) WithDeepClone(in func(value T) T, comments ...string) {
 	iter.userDeepClone = in
 }
 
-func (iter Dei[T]) String() string {
+func (iter Derp[T]) String() string {
 	var out string
 
 	out += fmt.Sprintf(

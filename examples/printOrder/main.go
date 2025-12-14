@@ -7,11 +7,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/kyleraywed/dei"
+	"github.com/kyleraywed/derp"
 )
 
 func main() {
-	var enum dei.Dei[byte]
+	var enum derp.Derp[byte]
 
 	enum.Filter(func(value byte) bool {
 		return value%2 == 0

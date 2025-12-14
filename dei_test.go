@@ -1,4 +1,4 @@
-package dei
+package derp
 
 import (
 	"maps"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestOrder(t *testing.T) {
-	var iter Dei[int]
+	var iter Derp[int]
 
 	iter.Filter(func(value int) bool {
 		return value%2 == 0
@@ -62,7 +62,7 @@ func TestOrder(t *testing.T) {
 
 func TestFilter(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dei[int]
+	var iter Derp[int]
 
 	iter.Filter(func(value int) bool {
 		return value%2 == 0 // return evens
@@ -84,7 +84,7 @@ func TestFilter(t *testing.T) {
 
 func TestMap(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dei[int]
+	var iter Derp[int]
 
 	iter.Map(func(value int) int {
 		return value * value // square the numbers
@@ -106,7 +106,7 @@ func TestMap(t *testing.T) {
 
 func TestTake(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 19}
-	var iter Dei[int]
+	var iter Derp[int]
 
 	iter.Take(5)
 
@@ -126,7 +126,7 @@ func TestTake(t *testing.T) {
 
 func TestSkip(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dei[int]
+	var iter Derp[int]
 
 	iter.Skip(5)
 
@@ -146,7 +146,7 @@ func TestSkip(t *testing.T) {
 
 func TestForeach(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dei[int]
+	var iter Derp[int]
 
 	expected := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 	var gotten []string
@@ -166,7 +166,7 @@ func TestForeach(t *testing.T) {
 
 func TestForeachFast(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var iter Dei[int]
+	var iter Derp[int]
 
 	expected := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 	var gotten []string
@@ -211,7 +211,7 @@ func TestDeepClone(t *testing.T) {
 
 	people := []person{p1}
 
-	var iter Dei[person]
+	var iter Derp[person]
 
 	iter.WithDeepClone(func(value person) person {
 		out := value
