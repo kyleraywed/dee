@@ -4,25 +4,25 @@ A concurrency-driven **d**eferred-**e**xecution **r**eusable data-processing **p
 
 ```go
 // Keep only the elements where in returns true. Optional comment strings.
-func (pipeline *Dei[T]) Filter(in func(value T) bool, comments ...string)
+func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string)
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
 // Concurrent execution will be slower for most use-cases, while the order in which the funcs are
 // evaluated is non-deterministic. Be careful when using "con".
-func (pipeline *Dei[T]) Foreach(in func(value T), comments ...string)
+func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string)
 
 // Transform each element by applying a function. Optional comment strings.
-func (pipeline *Dei[T]) Map(in func(value T) T, comments ...string)
+func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.
-func (pipeline *Dei[T]) Skip(n int)
+func (pipeline *Derp[T]) Skip(n int)
 
 // Yield only the first n items. Comments inferred.
-func (pipeline *Dei[T]) Take(n int)
+func (pipeline *Derp[T]) Take(n int)
 
 // Interpret orders on data. Return new slice.
-func (pipeline *Dei[T]) Apply(input []T) []T
+func (pipeline *Derp[T]) Apply(input []T) []T
 
 // If your element type contains any reference fields and you want to guarantee
 // that the original input is never mutated, provide a deep clone function here.
