@@ -229,6 +229,8 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			}
 
 			workingSlice = workingSlice[skipUntilIndex+1:]
+			// redistribute work evenly among workers after flattening
+			chunkSize = (len(workingSlice) + numWorkers - 1) / numWorkers
 
 		case "take":
 			takeUntilIndex := pipeline.takeCounts[order.index] - 1
@@ -239,6 +241,8 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			}
 
 			workingSlice = workingSlice[:takeUntilIndex+1]
+			// redistribute work evenly among workers after flattening
+			chunkSize = (len(workingSlice) + numWorkers - 1) / numWorkers
 		}
 	}
 
