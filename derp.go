@@ -212,24 +212,24 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			wg.Wait()
 
 		case "skip":
-			skipUntilIndex := pipeline.skipCounts[order.index] - 1
+			skipUntilIndex := pipeline.skipCounts[order.index]
 
-			if skipUntilIndex > len(workingSlice)-1 {
+			if skipUntilIndex > len(workingSlice) {
 				log.Printf("index %v out of range. skipping order...", skipUntilIndex)
 				continue
 			}
 
-			workingSlice = workingSlice[skipUntilIndex+1:]
+			workingSlice = workingSlice[skipUntilIndex:]
 
 		case "take":
-			takeUntilIndex := pipeline.takeCounts[order.index] - 1
+			takeUntilIndex := pipeline.takeCounts[order.index]
 
-			if takeUntilIndex > len(workingSlice)-1 {
+			if takeUntilIndex > len(workingSlice) {
 				log.Printf("index %v out of range, skipping order...", takeUntilIndex)
 				continue
 			}
 
-			workingSlice = workingSlice[:takeUntilIndex+1]
+			workingSlice = workingSlice[:takeUntilIndex]
 		}
 		// redistribute work evenly among workers after every order
 		chunkSize = (len(workingSlice) + numWorkers - 1) / numWorkers
