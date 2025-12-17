@@ -215,7 +215,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			skipUntilIndex := pipeline.skipCounts[order.index]
 
 			if skipUntilIndex > len(workingSlice) {
-				log.Printf("index %v out of range. skipping order...", skipUntilIndex)
+				log.Printf("index %v out of range. skipping \"skip\" order %v", skipUntilIndex-1, order.index+1)
 				continue
 			}
 
@@ -225,7 +225,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			takeUntilIndex := pipeline.takeCounts[order.index]
 
 			if takeUntilIndex > len(workingSlice) {
-				log.Printf("index %v out of range, skipping order...", takeUntilIndex)
+				log.Printf("index %v out of range, skipping \"take\" order %v", takeUntilIndex-1, order.index+1)
 				continue
 			}
 

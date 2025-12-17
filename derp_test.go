@@ -1,6 +1,7 @@
 package derp
 
 import (
+	"fmt"
 	"slices"
 	"strconv"
 	"sync"
@@ -104,13 +105,29 @@ func TestMap(t *testing.T) {
 }
 
 func TestTake(t *testing.T) {
-	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 19}
-	var pipe Derp[int]
+	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	var halfPipe Derp[int]
 
-	pipe.Take(5)
+	halfPipe.Take(5)
 
 	expected := []int{1, 2, 3, 4, 5}
-	gotten := pipe.Apply(numbers)
+	gotten := halfPipe.Apply(numbers)
+
+	if len(expected) != len(gotten) {
+		t.Error("Take len mismatch")
+	}
+
+	for idx, val := range expected {
+		if gotten[idx] != val {
+			t.Errorf("Take value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
+		}
+	}
+
+	var upperEdge Derp[int]
+	upperEdge.Take(11)
+	expected = numbers
+	fmt.Print("TESTING: EXPECT AN OUT-OF-RANGE LOG HERE: ")
+	gotten = upperEdge.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Take len mismatch")
@@ -125,12 +142,12 @@ func TestTake(t *testing.T) {
 
 func TestSkip(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	var pipe Derp[int]
+	var halfPipe Derp[int]
 
-	pipe.Skip(5)
+	halfPipe.Skip(5)
 
 	expected := []int{6, 7, 8, 9, 10}
-	gotten := pipe.Apply(numbers)
+	gotten := halfPipe.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Skip len mismatch")
@@ -139,6 +156,24 @@ func TestSkip(t *testing.T) {
 	for idx, val := range expected {
 		if gotten[idx] != val {
 			t.Errorf("Skip value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
+		}
+	}
+
+	var upperEdge Derp[int]
+
+	upperEdge.Skip(11)
+
+	expected = numbers
+	fmt.Print("TESTING: EXPECT AN OUT-OF-RANGE LOG HERE: ")
+	gotten = upperEdge.Apply(numbers)
+
+	if len(expected) != len(gotten) {
+		t.Error("Take len mismatch")
+	}
+
+	for idx, val := range expected {
+		if gotten[idx] != val {
+			t.Errorf("Take value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
 		}
 	}
 }
