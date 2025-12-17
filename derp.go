@@ -18,6 +18,7 @@ import (
 	"log"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 
 	clone "github.com/huandu/go-clone/generic"
@@ -94,7 +95,7 @@ func (pipeline *Derp[T]) Take(n int) {
 }
 
 // Interpret orders on data. Return new slice.
-func (pipeline *Derp[T]) Apply(input []T) []T {
+func (pipeline *Derp[T]) Apply(input []T) ([]T, error) {
 	workingSlice := make([]T, len(input))
 	workingSlice = clone.Clone(input) // deep clone by default
 
@@ -220,8 +221,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			skipUntilIndex := pipeline.skipCounts[order.index]
 
 			if skipUntilIndex > len(workingSlice) {
-				log.Printf("index %v out of range. skipping \"skip\" order %v", skipUntilIndex-1, order.index+1)
-				continue
+				return nil, fmt.Errorf("Skip(); index %v is out of range.", skipUntilIndex-1)
 			}
 
 			workingSlice = workingSlice[skipUntilIndex:]
@@ -230,8 +230,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			takeUntilIndex := pipeline.takeCounts[order.index]
 
 			if takeUntilIndex > len(workingSlice) {
-				log.Printf("index %v out of range, skipping \"take\" order %v", takeUntilIndex-1, order.index+1)
-				continue
+				return nil, fmt.Errorf("Take(); index %v is out of range", takeUntilIndex-1)
 			}
 
 			workingSlice = workingSlice[:takeUntilIndex]
@@ -240,11 +239,11 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 		chunkSize = (len(workingSlice) + numWorkers - 1) / numWorkers
 	}
 
-	return workingSlice
+	return workingSlice, nil
 }
 
 func (pipeline Derp[T]) String() string {
-	var out string
+	var out strings.Builder
 
 	for idx, val := range pipeline.orders {
 		var prettyComments string
@@ -257,11 +256,9 @@ func (pipeline Derp[T]) String() string {
 			prettyComments += "[ " + cmt + " ]\n\t\t"
 		}
 
-		out += fmt.Sprintf(
-			"Order %v:\n\tAdapter: %v\n\tIndex: %v\n\tComments: \n\t\t%v\n",
-			idx+1, val.method, val.index, prettyComments,
-		)
+		fmt.Fprintf(&out, "Order %v:\n\tAdapter: %v\n\tIndex: %v\n\tComments: \n\t\t%v\n",
+			idx+1, val.method, val.index, prettyComments)
 	}
 
-	return out
+	return out.String()
 }

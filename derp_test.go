@@ -1,7 +1,6 @@
 package derp
 
 import (
-	"fmt"
 	"slices"
 	"strconv"
 	"sync"
@@ -69,7 +68,7 @@ func TestFilter(t *testing.T) {
 	})
 
 	expected := []int{2, 4, 6, 8, 10}
-	gotten := pipe.Apply(numbers)
+	gotten, _ := pipe.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Filter len mismatch")
@@ -91,7 +90,7 @@ func TestMap(t *testing.T) {
 	})
 
 	expected := []int{1, 4, 9, 16, 25, 36, 49, 64, 81, 100}
-	gotten := pipe.Apply(numbers)
+	gotten, _ := pipe.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Map len mismatch")
@@ -111,7 +110,7 @@ func TestTake(t *testing.T) {
 	halfPipe.Take(5)
 
 	expected := []int{1, 2, 3, 4, 5}
-	gotten := halfPipe.Apply(numbers)
+	gotten, _ := halfPipe.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Take len mismatch")
@@ -125,18 +124,9 @@ func TestTake(t *testing.T) {
 
 	var upperEdge Derp[int]
 	upperEdge.Take(11)
-	expected = numbers
-	fmt.Print("TESTING: EXPECT AN OUT-OF-RANGE LOG HERE: ")
-	gotten = upperEdge.Apply(numbers)
-
-	if len(expected) != len(gotten) {
-		t.Error("Take len mismatch")
-	}
-
-	for idx, val := range expected {
-		if gotten[idx] != val {
-			t.Errorf("Take value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
-		}
+	_, err := upperEdge.Apply(numbers)
+	if err == nil {
+		t.Errorf("Out of range Take() value not throwing error.")
 	}
 }
 
@@ -147,7 +137,7 @@ func TestSkip(t *testing.T) {
 	halfPipe.Skip(5)
 
 	expected := []int{6, 7, 8, 9, 10}
-	gotten := halfPipe.Apply(numbers)
+	gotten, _ := halfPipe.Apply(numbers)
 
 	if len(expected) != len(gotten) {
 		t.Error("Skip len mismatch")
@@ -162,19 +152,9 @@ func TestSkip(t *testing.T) {
 	var upperEdge Derp[int]
 
 	upperEdge.Skip(11)
-
-	expected = numbers
-	fmt.Print("TESTING: EXPECT AN OUT-OF-RANGE LOG HERE: ")
-	gotten = upperEdge.Apply(numbers)
-
-	if len(expected) != len(gotten) {
-		t.Error("Take len mismatch")
-	}
-
-	for idx, val := range expected {
-		if gotten[idx] != val {
-			t.Errorf("Take value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
-		}
+	_, err := upperEdge.Apply(numbers)
+	if err == nil {
+		t.Errorf("Out of range Skip() value not throwing error.")
 	}
 }
 
@@ -253,7 +233,7 @@ func TestDeepClone(t *testing.T) {
 		return value
 	})
 
-	out := pipe.Apply(people)
+	out, _ := pipe.Apply(people)
 
 	if out[0].tags[0] != "CHANGED" {
 		t.Fatalf("Deep Clone mutation error, no change.\nExpected: [\"CHANGED\"] Got: [%v]\n", out[0].tags[0])

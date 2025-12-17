@@ -38,7 +38,7 @@ func main() {
 		return value
 	})
 
-	new := pipe.Apply(p)
+	new, _ := pipe.Apply(p)
 
 	fmt.Println("New:\t", new)
 	fmt.Println("Old:\t", p)

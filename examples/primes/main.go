@@ -24,7 +24,7 @@ func main() {
 	allocPipe.Map(func(value byte) byte {
 		return byte(rand.IntN(256))
 	})
-	numbers = allocPipe.Apply(numbers)
+	numbers, _ = allocPipe.Apply(numbers)
 
 	fmt.Printf("Finished in %v\n", time.Since(start))
 
@@ -53,6 +53,6 @@ func main() {
 		return true
 	})
 
-	_ = primePipe.Apply(numbers)
+	_, _ = primePipe.Apply(numbers)
 	fmt.Printf("Finished in %v\n", time.Since(start))
 }
