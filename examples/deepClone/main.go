@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/kyleraywed/derp"
 )
@@ -38,7 +39,10 @@ func main() {
 		return value
 	})
 
-	new, _ := pipe.Apply(p)
+	new, err := pipe.Apply(p)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println("New:\t", new)
 	fmt.Println("Old:\t", p)
