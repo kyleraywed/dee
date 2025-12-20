@@ -1,7 +1,6 @@
 package main
 
 /*
-	- Demonstrate WithDeepClone()
 	- NOTE: Auto deep-cloning is now the default
 */
 

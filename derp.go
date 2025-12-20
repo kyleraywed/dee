@@ -4,8 +4,7 @@ package derp
 
 /*
 	Todo:
-		- Add option to Apply() that allows cpu throttling by percent.
-		Right now, long-running operations just churn cycles and raise temps.
+		- Create dpc test
 */
 
 import (
