@@ -2,11 +2,6 @@ package derp
 
 // Deferred Execution Reusable data-processing Pipeline
 
-/*
-	Todo:
-		- Create dpc test
-*/
-
 import (
 	"fmt"
 	"math"
