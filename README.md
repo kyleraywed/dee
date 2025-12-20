@@ -13,7 +13,7 @@ func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string)
 // Transform each value by applying a function. Optional comment strings.
 func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 
-// Skip the first n items and yields the rest. Comment inferred.
+// Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Derp[T]) Skip(n int) error
 
 // Yield only the first n items. Comment inferred.
