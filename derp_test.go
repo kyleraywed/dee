@@ -1,11 +1,15 @@
 package derp
 
 import (
+	"fmt"
 	"log"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
+
+	clone "github.com/huandu/go-clone/generic"
 )
 
 func TestOrder(t *testing.T) {
@@ -287,5 +291,63 @@ func TestDeepClone(t *testing.T) {
 
 	if people[0].meta["one"] != 1 {
 		t.Fatalf("TestDeepClone(); mutation error, original data mutated.\nExpected: [1] Got: [%v]\n", out[0].meta["one"])
+	}
+}
+
+func TestDeepClonePointerCycle(t *testing.T) {
+	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+	type node struct {
+		value int
+		prev  *node
+		next  *node
+	}
+
+	makeDLL := func(values []int) *node {
+		if len(values) == 0 {
+			return nil
+		}
+		head := &node{value: values[0]}
+		prev := head
+		for _, v := range values[1:] {
+			n := &node{value: v, prev: prev}
+			prev.next = n
+			prev = n
+		}
+		return head
+	}
+
+	printList := func(head *node) string {
+		var sb strings.Builder
+		for n := head; n != nil; n = n.next {
+			prev := "nil"
+			if n.prev != nil {
+				prev = fmt.Sprintf("%d", n.prev.value)
+			}
+			next := "nil"
+			if n.next != nil {
+				next = fmt.Sprintf("%d", n.next.value)
+			}
+			fmt.Fprintf(&sb, "Node %d: prev=%s, next=%s\n", n.value, prev, next)
+		}
+		return sb.String()
+	}
+
+	expected := `Node 1: prev=nil, next=2
+Node 2: prev=1, next=3
+Node 3: prev=2, next=4
+Node 4: prev=3, next=5
+Node 5: prev=4, next=6
+Node 6: prev=5, next=7
+Node 7: prev=6, next=8
+Node 8: prev=7, next=9
+Node 9: prev=8, next=10
+Node 10: prev=9, next=nil`
+	head := makeDLL(numbers)
+	cloned := clone.Slowly(head)
+	gotten := printList(cloned)
+
+	if strings.Trim(expected, "\n") != strings.Trim(gotten, "\n") {
+		t.Errorf("BUG")
 	}
 }
