@@ -36,11 +36,11 @@ func TestOrder(t *testing.T) {
 	expected := []order{
 		{method: "filter", index: 0, comments: []string{"Foo"}},
 		{method: "map", index: 0, comments: []string{"Bar"}},
-		{method: "take", index: 0, comments: []string{"3"}},
-		{method: "skip", index: 0, comments: []string{"1"}},
+		{method: "take", index: 0, comments: []string{"take(3)"}},
+		{method: "skip", index: 0, comments: []string{"skip(1)"}},
 		{method: "map", index: 1, comments: []string{"baz"}},
 		{method: "filter", index: 1, comments: []string{"boo"}},
-		{method: "take", index: 1, comments: []string{"3"}},
+		{method: "take", index: 1, comments: []string{"take(3)"}},
 	}
 
 	if len(pipe.orders) != len(expected) {

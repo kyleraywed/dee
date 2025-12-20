@@ -72,7 +72,7 @@ func (pipeline *Derp[T]) Skip(n int) error {
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "skip",
 		index:    len(pipeline.skipCounts) - 1,
-		comments: []string{strconv.Itoa(n)},
+		comments: []string{"skip(" + strconv.Itoa(n) + ")"},
 	})
 
 	return nil
@@ -88,7 +88,7 @@ func (pipeline *Derp[T]) Take(n int) error {
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "take",
 		index:    len(pipeline.takeCounts) - 1,
-		comments: []string{strconv.Itoa(n)},
+		comments: []string{"take(" + strconv.Itoa(n) + ")"},
 	})
 
 	return nil
