@@ -115,7 +115,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 		workingSlice = clone.Clone(input) // regular deep clone by default
 	}
 
-	var throttleMult float64
+	throttleMult := 1.0
 	for _, opt := range options {
 		switch opt {
 		case "power-25":
@@ -125,9 +125,6 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 		case "power-75":
 			throttleMult = 0.75
 		}
-	}
-	if throttleMult == 0 {
-		throttleMult = 1
 	}
 
 	log.Printf("Running at %v%% power", throttleMult*100)
