@@ -10,6 +10,7 @@ package derp
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"runtime"
 	"slices"
@@ -105,7 +106,7 @@ func (pipeline *Derp[T]) Take(n int) error {
 // Options:
 //   - "dpc" : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
-//   - "power-[30, 50, 70]"; throttle cpu usage to 30, 50, or 70%. Default is 100%. Last power comment wins.
+//   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%. Last power comment wins.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	workingSlice := make([]T, len(input))
 	if len(options) > 0 && slices.Contains(options, "dpc") {
@@ -115,21 +116,21 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	}
 
 	var throttleMult float64
-
 	for _, opt := range options {
 		switch opt {
-		case "power-30":
-			throttleMult = 0.3
+		case "power-25":
+			throttleMult = 0.25
 		case "power-50":
 			throttleMult = 0.5
-		case "power-70":
-			throttleMult = 0.7
+		case "power-75":
+			throttleMult = 0.75
 		}
 	}
 	if throttleMult == 0 {
 		throttleMult = 1
 	}
-	//numWorkers := runtime.GOMAXPROCS(0)
+
+	log.Printf("Running at %v%% power", throttleMult*100)
 	numWorkers := max(int(math.Round(float64(runtime.GOMAXPROCS(0))*throttleMult)), 1)
 
 	// init chunksize
