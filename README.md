@@ -80,5 +80,5 @@ func main() {
 ```
 Notes and design
 -
-- Deep cloning is handled automatically via [go-clone](https://github.com/huandu/go-clone). 
+- Deep cloning is handled automatically via [go-clone](https://github.com/huandu/go-clone).
 - Derp is **not** safe for concurrent use.

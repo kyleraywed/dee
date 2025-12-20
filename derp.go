@@ -4,7 +4,9 @@ package derp
 
 import (
 	"fmt"
+	"log"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -40,7 +42,7 @@ func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 }
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
-// Set the first optional comment to "con" for concurrent execution of input functions.
+// Set any optional comment to "con" for concurrent execution of input functions.
 // Concurrent execution will be slower for most use-cases, while the order in which the funcs are
 // evaluated is non-deterministic. Be careful when using "con".
 func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
@@ -94,10 +96,16 @@ func (pipeline *Derp[T]) Take(n int) error {
 	return nil
 }
 
-// Interpret orders on data. Return new slice.
-func (pipeline *Derp[T]) Apply(input []T) ([]T, error) {
+// Interpret orders on data. Return new slice. If your input contains pointer cycles,
+// eg. doubly-linked lists, include "slowly" as an option.
+func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	workingSlice := make([]T, len(input))
-	workingSlice = clone.Clone(input) // deep clone by default
+	if len(options) > 0 && slices.Contains(options, "slowly") {
+		log.Println("Using clone.Slowly()")
+		workingSlice = clone.Slowly(input) // for pointer cycles
+	} else {
+		workingSlice = clone.Clone(input) // deep clone by default
+	}
 
 	numWorkers := runtime.GOMAXPROCS(0)
 	// init chunksize
@@ -156,7 +164,7 @@ func (pipeline *Derp[T]) Apply(input []T) ([]T, error) {
 		case "foreach":
 			workOrder := pipeline.foreachers[order.index]
 
-			if len(order.comments) > 0 && order.comments[0] == "con" {
+			if len(order.comments) > 0 && slices.Contains(order.comments, "con") {
 				var wg sync.WaitGroup
 				wg.Add(numWorkers)
 
