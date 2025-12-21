@@ -80,8 +80,8 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 // Only one Reduce can be set per pipeline. It is automatically executed last
 // regardless of the order in which it was added.
 //
-// Returns a promise and an error. When Apply() is run, Apply()'s output will be a []T with length 1.
-// The promise is fulfilled and promise.Get() will point to a single T value.
+// Returns a promise and an error. When Apply() is run, Apply()'s output will be a []T with a single elelment.
+// The promise is fulfilled and promise.Get() will point to a single T value. Nil if unfulfilled.
 func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (*promise.Promise[T], error) {
 	if pipeline.reduceInstruct != nil {
 		return nil, fmt.Errorf("Reduce has already been set.")
