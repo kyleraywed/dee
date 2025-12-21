@@ -78,7 +78,7 @@ func main() {
         return acc + value
     })
     if err != nil {
-        log.Fatal(err) 
+        log.Println(err) // This will log if you try to call Reduce() more than once
     }
 
     // Fourth. 
