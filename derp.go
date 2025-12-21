@@ -32,11 +32,12 @@ type Derp[T any] struct {
 	mapInstructs     []func(t T) T
 	foreachInstructs []func(t T)
 	reduceInstruct   func(a T, v T) T
-
-	takeCounts []int
-	skipCounts []int
+	takeCounts       []int
+	skipCounts       []int
 
 	orders []order
+
+	reducePromise *T
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
@@ -78,19 +79,22 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 // Only one Reduce can be set per pipeline. It is automatically executed last
 // regardless of the order in which it was added.
 //
-// Returns a slice containing a single value: the final accumulator.
-func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) error {
-	// reduceInstructs
+// Returns a promise and an error. When Apply() is run, Apply()'s output will be a []T with length 1.
+// The promise is fulfilled and will point to a single T value.
+//
+// If *promise != nil, **promise holds a value
+func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (**T, error) {
 	if pipeline.reduceInstruct != nil {
-		return fmt.Errorf("Reduce has already been set.")
+		return nil, fmt.Errorf("Reduce has already been set.")
 	}
+
 	pipeline.reduceInstruct = in
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "reduce",
 		comments: comments,
 	})
 
-	return nil
+	return &pipeline.reducePromise, nil
 }
 
 // Skip the first n items and yield the rest. Comment inferred.
@@ -285,9 +289,8 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 
 		case "reduce":
 			workOrder := pipeline.reduceInstruct
-
 			if len(workingSlice) == 0 {
-				return nil, fmt.Errorf("Reduce(); reduce on empty slice")
+				return nil, fmt.Errorf("Reduce on empty slice")
 			}
 
 			acc := workingSlice[0]
@@ -295,6 +298,8 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 				acc = workOrder(acc, v)
 			}
 
+			pipeline.reducePromise = new(T)
+			*pipeline.reducePromise = acc
 			workingSlice = []T{acc}
 
 		case "skip":

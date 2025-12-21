@@ -12,6 +12,20 @@ import (
 	clone "github.com/huandu/go-clone/generic"
 )
 
+func TestReduceReturn(t *testing.T) {
+	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	pipe := &Derp[int]{}
+	promise, _ := pipe.Reduce(func(acc, value int) int {
+		return acc + value
+	})
+
+	// if *promise != nil, **promise will hold a value
+	pipe.Apply(numbers)
+	if *promise != nil && **promise != 55 {
+		t.Error("TestReduceReturn(); value mismatch")
+	}
+}
+
 func TestOrder(t *testing.T) {
 	var pipe Derp[int]
 
