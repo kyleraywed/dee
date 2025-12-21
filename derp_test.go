@@ -12,17 +12,22 @@ import (
 	clone "github.com/huandu/go-clone/generic"
 )
 
-func TestReduceReturn(t *testing.T) {
+func TestReducePromise(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	pipe := &Derp[int]{}
+	var pipe Derp[int]
 	promise, _ := pipe.Reduce(func(acc, value int) int {
 		return acc + value
 	})
 
 	// if *promise != nil, **promise will hold a value
+	if _, ok := promise.Get(); ok {
+		t.Error("promise expected to be nil")
+	}
 	pipe.Apply(numbers)
-	if *promise != nil && **promise != 55 {
-		t.Error("TestReduceReturn(); value mismatch")
+	if val, ok := promise.Get(); ok {
+		if val != 55 {
+			t.Errorf("TestReduceReturn()")
+		}
 	}
 }
 

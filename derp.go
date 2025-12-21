@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	clone "github.com/huandu/go-clone/generic"
+	"github.com/kyleraywed/derp/promise"
 )
 
 type order struct {
@@ -37,7 +38,7 @@ type Derp[T any] struct {
 
 	orders []order
 
-	reducePromise *T
+	reducePromise promise.Promise[T]
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
@@ -83,7 +84,7 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 // The promise is fulfilled and will point to a single T value.
 //
 // If *promise != nil, **promise holds a value
-func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (**T, error) {
+func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (*promise.Promise[T], error) {
 	if pipeline.reduceInstruct != nil {
 		return nil, fmt.Errorf("Reduce has already been set.")
 	}
@@ -298,8 +299,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 				acc = workOrder(acc, v)
 			}
 
-			pipeline.reducePromise = new(T)
-			*pipeline.reducePromise = acc
+			pipeline.reducePromise.Set(acc)
 			workingSlice = []T{acc}
 
 		case "skip":
