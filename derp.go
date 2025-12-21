@@ -2,6 +2,12 @@ package derp
 
 // Deferred Execution Reusable data-processing Pipeline
 
+/*
+	Notes:
+		- Already tried dynamic scheduling, but the necessary mutex used by the channel makes things roughly 165x slower.
+			- ~200ms -> ~33s in examples/primes
+*/
+
 import (
 	"fmt"
 	"math"
