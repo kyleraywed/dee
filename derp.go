@@ -146,8 +146,10 @@ func (pipeline *Derp[T]) Take(n int) error {
 }
 
 // Interpret orders on data. Return new slice.
+// Non-pointer-cycle-safe deep-cloning by default.
 //
 // Options:
+//   - "nocopy"; operate directly on the input backing array. Expect mutations to input.
 //   - "dpc" : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%.
@@ -166,6 +168,8 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	workingSlice := make([]T, len(input))
 	if len(options) > 0 && slices.Contains(options, "dpc") {
 		workingSlice = clone.Slowly(input) // for pointer cycles
+	} else if len(options) > 0 && slices.Contains(options, "nocopy") {
+		workingSlice = input
 	} else {
 		workingSlice = clone.Clone(input) // regular deep clone by default
 	}
