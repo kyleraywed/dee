@@ -150,7 +150,6 @@ func (pipeline *Derp[T]) Take(n int) error {
 // Options:
 //   - "dpc" : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
-//   - "cr" : "(c)oncurrent (r)educe"; only mathematically valid if reducer is associative and commutative.
 //   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	// Ensure reduce is the last instruction in the orders
@@ -306,57 +305,17 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 
 		case "reduce":
 			workOrder := pipeline.reduceInstruct
-			if len(options) > 1 && slices.Contains(options, "cr") {
-				if len(workingSlice) == 0 {
-					panic("empty reduce")
-				}
 
-				chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
-				results := make([]T, numWorkers)
-
-				var wg sync.WaitGroup
-				wg.Add(numWorkers)
-
-				for i := range numWorkers {
-					start := i * chunkSize
-					end := min(start+chunkSize, len(workingSlice))
-
-					if start >= len(workingSlice) {
-						wg.Done()
-						continue
-					}
-
-					go func(i int, chunk []T) {
-						defer wg.Done()
-
-						acc := chunk[0]
-						for _, v := range chunk[1:] {
-							acc = workOrder(acc, v)
-						}
-						results[i] = acc
-					}(i, workingSlice[start:end])
-				}
-
-				wg.Wait()
-
-				// Final reduce of partial results
-				acc := results[0]
-				for _, v := range results[1:] {
-					acc = pipeline.reduceInstruct(acc, v)
-				}
-
-			} else {
-				if len(workingSlice) == 0 {
-					return nil, fmt.Errorf("Reduce on empty slice")
-				}
-
-				acc := workingSlice[0]
-				for _, v := range workingSlice[1:] {
-					acc = workOrder(acc, v)
-				}
-
-				workingSlice = []T{acc}
+			if len(workingSlice) == 0 {
+				return nil, fmt.Errorf("Reduce on empty slice")
 			}
+
+			acc := workingSlice[0]
+			for _, v := range workingSlice[1:] {
+				acc = workOrder(acc, v)
+			}
+
+			workingSlice = []T{acc}
 
 		case "skip":
 			skipUntilIndex := pipeline.skipCounts[order.index]
