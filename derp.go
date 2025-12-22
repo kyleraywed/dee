@@ -12,6 +12,7 @@ package derp
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"runtime"
 	"slices"
 	"strconv"
@@ -149,7 +150,8 @@ func (pipeline *Derp[T]) Take(n int) error {
 // Non-pointer-cycle-safe deep-cloning by default.
 //
 // Options:
-//   - "nocopy"; operate directly on the input backing array. Expect mutations to input.
+//   - "nocopy"; operate directly on the input backing array. Expect mutations on reference types. Default for value types.
+//   - "clone"; deep-clone non pointer cycle data. Default for reference types and structs.
 //   - "dpc" : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%.
@@ -165,7 +167,41 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 		}
 	}
 
+	hasMultipleClones := func(in []string) bool {
+		targets := []string{"nocopy", "clone", "dpc"}
+		count := 0
+
+		for _, val := range targets {
+			if slices.Contains(in, val) {
+				count++
+			}
+			if count >= 2 {
+				return true
+			}
+		}
+		return false
+	}
+
+	// check that multiple clone options aren't invoked
+	if hasMultipleClones(options) {
+		return nil, fmt.Errorf("error: cannot invoke multiple cloning options")
+	}
+
+	inputType := reflect.TypeOf(input[0])
+
+	hasExplicitCloneOption := slices.Contains(options, "dcp") || slices.Contains(options, "nocopy") || slices.Contains(options, "clone")
+
+	if !hasExplicitCloneOption {
+		switch inputType.Kind() {
+		case reflect.Slice, reflect.Map, reflect.Pointer, reflect.Struct:
+			options = append(options, "clone")
+		default:
+			options = append(options, "nocopy")
+		}
+	}
+
 	workingSlice := make([]T, len(input))
+
 	if len(options) > 0 && slices.Contains(options, "dpc") {
 		workingSlice = clone.Slowly(input) // for pointer cycles
 	} else if len(options) > 0 && slices.Contains(options, "nocopy") {
