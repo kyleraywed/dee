@@ -345,14 +345,6 @@ func TestSkip(t *testing.T) {
 			t.Errorf("TestSkip(); value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
 		}
 	}
-
-	var outOfBounds Derp[int]
-
-	outOfBounds.Skip(len(numbers) + 1)
-	_, err = outOfBounds.Apply(numbers)
-	if err == nil {
-		t.Errorf("TestSkip(); out of range Skip(%v) value not throwing error.", len(numbers)+1)
-	}
 }
 
 func TestTake(t *testing.T) {
@@ -378,12 +370,5 @@ func TestTake(t *testing.T) {
 		if gotten[idx] != val {
 			t.Errorf("TestTake(); value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
 		}
-	}
-
-	var outOfBounds Derp[int]
-	outOfBounds.Take(len(numbers) + 1)
-	_, err = outOfBounds.Apply(numbers)
-	if err == nil {
-		t.Errorf("TestTake(); out of range Take(%v) did not return expected error.", len(numbers)+1)
 	}
 }

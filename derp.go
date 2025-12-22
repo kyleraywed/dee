@@ -297,12 +297,12 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 
 				chunk := workingSlice[start:end]
 
-				go func() {
+				go func(c []T) {
 					defer wg.Done()
 					for i := range chunk {
-						chunk[i] = workOrder(chunk[i])
+						c[i] = workOrder(c[i])
 					}
-				}()
+				}(chunk)
 			}
 
 			wg.Wait()
@@ -325,19 +325,17 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 			skipUntilIndex := pipeline.skipCounts[order.index]
 
 			if skipUntilIndex > len(workingSlice) {
-				return nil, fmt.Errorf("Skip(); index %v is out of range.", skipUntilIndex-1)
+				workingSlice = workingSlice[:0] // skip all
+			} else {
+				workingSlice = workingSlice[skipUntilIndex:]
 			}
-
-			workingSlice = workingSlice[skipUntilIndex:]
 
 		case "take":
 			takeUntilIndex := pipeline.takeCounts[order.index]
 
-			if takeUntilIndex > len(workingSlice) {
-				return nil, fmt.Errorf("Take(); index %v is out of range", takeUntilIndex-1)
+			if takeUntilIndex < len(workingSlice) {
+				workingSlice = workingSlice[:takeUntilIndex]
 			}
-
-			workingSlice = workingSlice[:takeUntilIndex]
 		}
 
 		// redistribute work evenly among workers after every order
