@@ -25,13 +25,13 @@ import (
 type Option byte
 
 const (
-	NoCopyOpt Option = iota
-	CloneOpt
-	DpcOpt
-	CfeOpt
-	Power25Opt
-	Power50Opt
-	Power75Opt
+	Opt_NoCopy Option = iota
+	Opt_Clone
+	Opt_DPC
+	Opt_CFE
+	Opt_Power25
+	Opt_Power50
+	Opt_Power75
 )
 
 type order struct {
@@ -180,22 +180,22 @@ func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) {
 	}
 
 	// Ensure only one or less each clone opt and power opt
-	if hasMultipleOpts(options, NoCopyOpt, DpcOpt, CloneOpt) {
+	if hasMultipleOpts(options, Opt_NoCopy, Opt_Clone, Opt_DPC) {
 		return nil, fmt.Errorf("error: cannot invoke multiple cloning options")
 	}
-	if hasMultipleOpts(options, Power25Opt, Power50Opt, Power75Opt) {
+	if hasMultipleOpts(options, Opt_Power25, Opt_Power50, Opt_Power75) {
 		return nil, fmt.Errorf("error: cannot invoke multiple power throttling options")
 	}
 
 	inputType := reflect.TypeOf(input[0])
-	hasExplicitCloneOption := slices.Contains(options, DpcOpt) || slices.Contains(options, NoCopyOpt) || slices.Contains(options, CloneOpt)
+	hasExplicitCloneOption := slices.Contains(options, Opt_DPC) || slices.Contains(options, Opt_NoCopy) || slices.Contains(options, Opt_Clone)
 
 	if !hasExplicitCloneOption {
 		switch inputType.Kind() {
 		case reflect.Slice, reflect.Map, reflect.Pointer, reflect.Struct:
-			options = append(options, CloneOpt)
+			options = append(options, Opt_Clone)
 		default:
-			options = append(options, NoCopyOpt)
+			options = append(options, Opt_NoCopy)
 		}
 	}
 
@@ -203,11 +203,11 @@ func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) {
 
 	for _, opt := range options {
 		switch opt {
-		case NoCopyOpt:
+		case Opt_NoCopy:
 			workingSlice = input
-		case CloneOpt:
+		case Opt_Clone:
 			workingSlice = clone.Clone(input)
-		case DpcOpt:
+		case Opt_DPC:
 			workingSlice = clone.Slowly(input)
 		}
 	}
@@ -215,11 +215,11 @@ func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) {
 	throttleMult := 1.0
 	for _, opt := range options {
 		switch opt {
-		case Power25Opt:
+		case Opt_Power25:
 			throttleMult = 0.25
-		case Power50Opt:
+		case Opt_Power50:
 			throttleMult = 0.5
-		case Power75Opt:
+		case Opt_Power75:
 			throttleMult = 0.75
 		}
 	}
@@ -284,7 +284,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) {
 		case "foreach":
 			workOrder := pipeline.foreachInstructs[order.index]
 
-			if len(options) > 0 && slices.Contains(options, CfeOpt) {
+			if len(options) > 0 && slices.Contains(options, Opt_CFE) {
 				var wg sync.WaitGroup
 				wg.Add(numWorkers)
 
