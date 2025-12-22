@@ -19,7 +19,7 @@ func main() {
 
 	enum.Reduce(func(acc, value byte) byte {
 		return acc + value
-	}, "The reduce order is moved to the last order at Apply().", "This is the only method with a side-effect.")
+	}, "The reduce order is moved to the last order at Apply().", "This is the only instruction with a side-effect.")
 
 	enum.Skip(2)
 
@@ -29,7 +29,7 @@ func main() {
 	}, "Increment value", "Check the index")
 
 	fmt.Println(enum)
-	fmt.Println("--------------------------------")
+	fmt.Printf("------------Apply()-------------\n\n")
 	enum.Apply([]byte{})
 	fmt.Println(enum)
 }

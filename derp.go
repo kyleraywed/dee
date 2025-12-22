@@ -41,6 +41,27 @@ type Derp[T any] struct {
 	reducePromise promise.Promise[T]
 }
 
+func (pipeline Derp[T]) String() string {
+	var out strings.Builder
+
+	for idx, val := range pipeline.orders {
+		var prettyComments strings.Builder
+
+		if len(val.comments) == 0 {
+			prettyComments .WriteString("[ N/A ]\n")
+		}
+
+		for _, cmt := range val.comments {
+			prettyComments .WriteString("[ " + cmt + " ]\n\t\t")
+		}
+
+		fmt.Fprintf(&out, "Order %v:\n\tAdapter: %v\n\tIndex: %v\n\tComments: \n\t\t%v\n",
+			idx+1, val.method, val.index, prettyComments.String())
+	}
+
+	return out.String()
+}
+
 // Keep only the elements where in returns true. Optional comment strings.
 func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 	pipeline.filterInstructs = append(pipeline.filterInstructs, in)
@@ -326,25 +347,4 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	}
 
 	return workingSlice, nil
-}
-
-func (pipeline Derp[T]) String() string {
-	var out strings.Builder
-
-	for idx, val := range pipeline.orders {
-		var prettyComments string
-
-		if len(val.comments) == 0 {
-			prettyComments += "[ N/A ]\n"
-		}
-
-		for _, cmt := range val.comments {
-			prettyComments += "[ " + cmt + " ]\n\t\t"
-		}
-
-		fmt.Fprintf(&out, "Order %v:\n\tAdapter: %v\n\tIndex: %v\n\tComments: \n\t\t%v\n",
-			idx+1, val.method, val.index, prettyComments)
-	}
-
-	return out.String()
 }
