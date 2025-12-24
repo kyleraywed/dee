@@ -12,6 +12,28 @@ import (
 	clone "github.com/huandu/go-clone/generic"
 )
 
+func TestNoCopyImmutability(t *testing.T) {
+	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	var pipe Pipeline[int]
+
+	pipe.Filter(func(value int) bool {
+		return value%2 == 0
+	})
+
+	pipe.Map(func(value int) int {
+		return value * 2
+	})
+
+	got, err := pipe.Apply(numbers)
+	if err != nil {
+		t.Errorf("Error from Apply(): %v", err)
+	}
+
+	if slices.Equal(got, numbers) {
+		t.Errorf("TestNoCopyImmutability(); value type input mutated")
+	}
+}
+
 func TestDeepClone(t *testing.T) {
 	type person struct {
 		name string
@@ -48,6 +70,43 @@ func TestDeepClone(t *testing.T) {
 
 	if people[0].meta["one"] != 1 {
 		t.Fatalf("TestDeepClone(); mutation error, original data mutated.\nExpected: [1] Got: [%v]\n", out[0].meta["one"])
+	}
+}
+
+func TestDeepCloneForEachMut(t *testing.T) {
+	type person struct {
+		name string
+		tags []string
+		meta map[string]int
+	}
+
+	p1 := person{
+		name: "kyle",
+		tags: []string{"x", "y", "z"},
+		meta: map[string]int{
+			"one": 1,
+		},
+	}
+
+	people := []person{p1}
+
+	var pipe Pipeline[person]
+
+	pipe.Foreach(func(value person) {
+		value.tags[0] = "CHANGED"
+		value.meta["one"] = 99
+	})
+
+	_, err := pipe.Apply(people)
+	if err != nil {
+		t.Errorf("TestDeepCloneForEachMut(); error from Apply(): %v", err)
+	}
+
+	if people[0].tags[0] == "CHANGED" {
+		t.Errorf("TestDeepCloneForEachMut(); Unexpected behavior: input data mutated: tags")
+	}
+	if people[0].meta["one"] == 99 {
+		t.Errorf("TestDeepCloneForEachMut(); Unexpected behavior: input data mutated: meta")
 	}
 }
 
