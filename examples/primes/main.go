@@ -18,6 +18,7 @@ const size = (1024 * 1024 * 100) / int(unsafe.Sizeof(int(0)))
 
 func main() {
 	fmt.Printf("Size: %v ints / %v bytes\n\n", size, size*int(unsafe.Sizeof(int(0))))
+
 	start := time.Now()
 	fmt.Print("Allocating... ")
 
@@ -39,23 +40,7 @@ func main() {
 	var primePipe derp.Pipeline[int]
 
 	primePipe.Filter(func(value int) bool {
-		if value < 2 {
-			return false
-		}
-		if value == 2 || value == 3 {
-			return true
-		}
-		if value%2 == 0 || value%3 == 0 {
-			return false
-		}
-
-		for i := 5; i*i <= int(value); i += 6 {
-			if int(value)%i == 0 || int(value)%(i+2) == 0 {
-				return false
-			}
-		}
-
-		return true
+		return isPrime(value)
 	})
 
 	_, err = primePipe.Apply(numbers)
@@ -63,4 +48,24 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Finished in %v\n", time.Since(start))
+}
+
+func isPrime(value int) bool {
+	if value < 2 {
+		return false
+	}
+	if value == 2 || value == 3 {
+		return true
+	}
+	if value%2 == 0 || value%3 == 0 {
+		return false
+	}
+
+	for i := 5; i*i <= int(value); i += 6 {
+		if int(value)%i == 0 || int(value)%(i+2) == 0 {
+			return false
+		}
+	}
+
+	return true
 }
