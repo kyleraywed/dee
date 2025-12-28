@@ -27,7 +27,7 @@ func main() {
 	pipe.Map(func(value int) int {
 		return rand.IntN(256)
 	})
-	numbers, err := pipe.Apply(numbers, derp.Opt_Reset)
+	numbers, err := pipe.Apply(numbers, derp.Opt_Reset) // Reset will clear order and instructions after interpreting
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,8 +36,6 @@ func main() {
 
 	start = time.Now()
 	fmt.Print("Processing... ")
-	// new pipeline required as running Apply doesn't consume
-	//var primePipe derp.Pipeline[int]
 
 	pipe.Filter(func(value int) bool {
 		return isPrime(value)
