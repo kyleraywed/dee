@@ -32,6 +32,7 @@ const (
 	Opt_Power25
 	Opt_Power50
 	Opt_Power75
+	Opt_Reset
 )
 
 type order struct {
@@ -127,20 +128,6 @@ func (pipeline *Pipeline[T]) Reduce(in func(acc T, value T) T, comments ...strin
 	return nil
 }
 
-func (pipeline *Pipeline[T]) Reset(comments ...string) error {
-	if pipeline.doReset {
-		return fmt.Errorf("Reset has already been set")
-	}
-
-	pipeline.doReset = true
-	pipeline.orders = append(pipeline.orders, order{
-		method:   "reset",
-		comments: comments,
-	})
-
-	return nil
-}
-
 // Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Pipeline[T]) Skip(n int) error {
 	if n < 1 {
@@ -194,15 +181,6 @@ func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 			if ord.method == "reduce" {
 				pipeline.orders = append(pipeline.orders[:idx], pipeline.orders[idx+1:]...) // remove it where it is
 				pipeline.orders = append(pipeline.orders, ord)                              // put it on the end
-				break
-			}
-		}
-	}
-	if pipeline.reduceInstruct != nil && pipeline.orders[len(pipeline.orders)-1].method != "reset" {
-		for idx, ord := range pipeline.orders {
-			if ord.method == "reset" {
-				pipeline.orders = append(pipeline.orders[:idx], pipeline.orders[idx+1:]...)
-				pipeline.orders = append(pipeline.orders, ord)
 				break
 			}
 		}
@@ -389,15 +367,6 @@ func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 
 			workingSlice = []T{acc}
 
-		case "reset":
-			pipeline.filterInstructs = nil
-			pipeline.foreachInstructs = nil
-			pipeline.mapInstructs = nil
-			pipeline.reduceInstruct = nil
-			pipeline.doReset = false
-			pipeline.skipCounts = nil
-			pipeline.takeCounts = nil
-
 		case "skip":
 			skipUntilIndex := pipeline.skipCounts[order.index]
 
@@ -419,6 +388,16 @@ func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 		//old := chunkSize
 		chunkSize = (len(workingSlice) + numWorkers - 1) / numWorkers
 		//log.Printf("Redistributing work:\n\tOld chunksize: %v\n\tNew chunksize: %v", old, chunkSize)
+	}
+
+	if slices.Contains(options, Opt_Reset) {
+		pipeline.filterInstructs = nil
+		pipeline.foreachInstructs = nil
+		pipeline.mapInstructs = nil
+		pipeline.reduceInstruct = nil
+		pipeline.doReset = false
+		pipeline.skipCounts = nil
+		pipeline.takeCounts = nil
 	}
 
 	return workingSlice, nil
