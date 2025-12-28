@@ -170,7 +170,7 @@ func (pipeline *Pipeline[T]) Take(n int) error {
 func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 	if len(input) < 1 {
 		var zero []T
-		return zero, fmt.Errorf("error: empty input slice")
+		return zero, fmt.Errorf("empty input slice")
 	}
 
 	// Ensure reduce is the last instruction in the orders
@@ -186,10 +186,10 @@ func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 
 	// Ensure only one or less each clone opt and power opt
 	if hasMultipleOpts(options, Opt_NoCopy, Opt_Clone, Opt_DPC) {
-		return nil, fmt.Errorf("error: cannot invoke multiple cloning options")
+		return nil, fmt.Errorf("cannot invoke multiple cloning options")
 	}
 	if hasMultipleOpts(options, Opt_Power25, Opt_Power50, Opt_Power75) {
-		return nil, fmt.Errorf("error: cannot invoke multiple power throttling options")
+		return nil, fmt.Errorf("cannot invoke multiple power throttling options")
 	}
 
 	inputType := reflect.TypeOf(input[0])
