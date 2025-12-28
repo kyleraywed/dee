@@ -253,6 +253,8 @@ func TestForeachMut(t *testing.T) {
 	var pipe Pipeline[int]
 
 	pipe.Foreach(func(value int) {
+		// staticcheck will complain here, unless...
+		//lint:ignore SA4006 this value of value is never used
 		value = value * 2
 	})
 

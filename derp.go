@@ -114,7 +114,7 @@ func (pipeline *Pipeline[T]) Map(in func(value T) T, comments ...string) {
 // When Apply() is run, Apply()'s output will be a []T with a single element.
 func (pipeline *Pipeline[T]) Reduce(in func(acc T, value T) T, comments ...string) error {
 	if pipeline.reduceInstruct != nil {
-		return fmt.Errorf("Reduce has already been set.")
+		return fmt.Errorf("Reduce has already been set")
 	}
 
 	pipeline.reduceInstruct = in
@@ -129,7 +129,7 @@ func (pipeline *Pipeline[T]) Reduce(in func(acc T, value T) T, comments ...strin
 // Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Pipeline[T]) Skip(n int) error {
 	if n < 1 {
-		return fmt.Errorf("Skip(%v): No order submitted.", n)
+		return fmt.Errorf("Skip(%v): No order submitted", n)
 	}
 
 	pipeline.skipCounts = append(pipeline.skipCounts, n)
@@ -145,7 +145,7 @@ func (pipeline *Pipeline[T]) Skip(n int) error {
 // Yield only the first n items from the pipeline. Comment inferred.
 func (pipeline *Pipeline[T]) Take(n int) error {
 	if n < 1 {
-		return fmt.Errorf("Take(%v): No order submitted.", n)
+		return fmt.Errorf("Take(%v): No order submitted", n)
 	}
 
 	pipeline.takeCounts = append(pipeline.takeCounts, n)
