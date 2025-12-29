@@ -7,35 +7,27 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand/v2"
 	"time"
 	"unsafe"
 
 	"github.com/kyleraywed/derp"
 )
 
-const size = (1024 * 1024 * 100) / int(unsafe.Sizeof(int(0)))
+// the number of ints to fill 200 MB
+const size = (1024 * 1024 * 200) / int(unsafe.Sizeof(int(0)))
 
 func main() {
-	fmt.Printf("Size: %v ints / %v bytes\n\n", size, size*int(unsafe.Sizeof(int(0))))
+	fmt.Printf("Size: %v ints / %v bytes\n", size, size*int(unsafe.Sizeof(int(0))))
+	numbers := Range(size)
+
+	var pipe derp.Pipeline[int]
 
 	start := time.Now()
-	fmt.Print("Allocating... ")
-
-	numbers := make([]int, size)
-	var pipe derp.Pipeline[int]
-	pipe.Map(func(value int) int {
-		return rand.IntN(256)
-	})
-	numbers, err := pipe.Apply(numbers, derp.Opt_Reset) // Reset will clear order and instructions after interpreting
+	fmt.Print("Processing with Derp... ")
+	numbers, err := pipe.Apply(numbers)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Printf("Finished in %v\n", time.Since(start))
-
-	start = time.Now()
-	fmt.Print("Processing... ")
 
 	pipe.Filter(func(value int) bool {
 		return isPrime(value)
@@ -46,6 +38,24 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Finished in %v\n", time.Since(start))
+
+	start = time.Now()
+	fmt.Print("Processing via range... ")
+	rangeHolder := make([]int, len(numbers))
+	for _, val := range numbers {
+		if isPrime(val) {
+			rangeHolder = append(rangeHolder, val)
+		}
+	}
+	fmt.Printf("Finished in %v\n", time.Since(start))
+}
+
+func Range(n int) []int {
+	out := make([]int, n)
+	for i := range out {
+		out[i] = i + 1
+	}
+	return out
 }
 
 func isPrime(value int) bool {
