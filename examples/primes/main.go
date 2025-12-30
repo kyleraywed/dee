@@ -44,6 +44,7 @@ func main() {
 	rangeHolder := make([]int, len(numbers))
 	for _, val := range numbers {
 		if isPrime(val) {
+			//lint:ignore SA4010 benchmarking
 			rangeHolder = append(rangeHolder, val)
 		}
 	}
