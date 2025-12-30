@@ -11,7 +11,7 @@ func (pipeline *Pipeline[T]) Filter(in func(value T) bool, comments ...string)
 func (pipeline *Pipeline[T]) Foreach(in func(value T), comments ...string)
 
 // Transform each value by applying a function. Optional comment strings.
-func (pipeline *Pipeline[T]) Map(in func(value T) T, comments ...string)
+func (pipeline *Pipeline[T]) Map(in func(index int, value T) T, comments ...string)
 
 // Reduce sets a terminal operation that aggregates all elements of the pipeline into a single value.
 //
